@@ -27,7 +27,7 @@ TaskFlow is a lightweight web-based task management system built using Java Serv
 ---
 
 ## 📸 Screenshots
-### 🏠 Home / Dashboard
+### 🏠 Home Page
 ![Home Page](img/home.png)
 
 ### 🔐 Register Page

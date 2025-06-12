@@ -1,6 +1,5 @@
 package com.taskflow;
 
-
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -11,10 +10,10 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 @WebServlet("/Login")
-public class Login extends HttpServlet{
-	
+public class Login extends HttpServlet {
 	
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -24,22 +23,37 @@ public class Login extends HttpServlet{
 		
 		try (Connection conn = DB.getConnection()) {
 		
-			PreparedStatement smtp = conn.prepareStatement("select *from users where username=? and password=?");
-			smtp.setString(1, username);
-			smtp.setString(2, password);
-			ResultSet rs = smtp.executeQuery();
+			PreparedStatement stmt = conn.prepareStatement("SELECT * FROM users WHERE username=? AND password=?");
+			stmt.setString(1, username);
+			stmt.setString(2, password);
+			ResultSet rs = stmt.executeQuery();
 			
-			if(rs.next()) {
-				System.out.println("sss2");
-			}else {
-				System.out.println("ffff");
+			if (rs.next()) {
+				
+				String userId = rs.getString("id");
+				HttpSession session = req.getSession();
+				session.setAttribute("user_id", userId);
+				
+				resp.sendRedirect("addTask.jsp");
+				
+			} 
+			else
+			{
+				
+				req.setAttribute("errorMessage", "Invalid username or password.");
+				
+				req.getRequestDispatcher("login.jsp").forward(req, resp);
+				
 			}
 
 		} catch (Exception e) {
+			
 		    e.printStackTrace();
+		    req.setAttribute("errorMessage", "Internal error occurred. Please try again later.");
+		    req.getRequestDispatcher("login.jsp").forward(req, resp);
+		    
 		}	
 		
 	}
 	
-
 }

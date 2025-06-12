@@ -52,7 +52,7 @@ TaskFlow is a lightweight web-based task management system built using Java Serv
 
 ### 🔧 1. Environment Setup
 
-- Install **XAMPP** / **WAMP** (or any MySQL server).
+- Install **MySQL Server**.
 - Install **Apache Tomcat**.
 - Use **Eclipse** or **IntelliJ** with Java EE support.
 - Add **MySQL JDBC Connector** `.jar` file to `/lib`.

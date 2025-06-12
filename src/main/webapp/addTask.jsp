@@ -172,6 +172,17 @@ body {
 						aria-label="Close"></button>
 				</div>
 				<div class="modal-body">
+					<!-- Filter Dropdown -->
+					<div class="mb-3 text-end">
+						<label for="statusFilter" class="form-label me-2">Filter
+							by Status:</label> <select id="statusFilter"
+							class="form-select w-auto d-inline">
+							<option value="All">All</option>
+							<option value="pending">Pending</option>
+							<option value="completed">Completed</option>
+						</select>
+					</div>
+
 					<table class="table table-bordered table-hover text-center">
 						<thead class="table-light">
 							<tr>
@@ -182,16 +193,23 @@ body {
 								<th>Actions</th>
 							</tr>
 						</thead>
-						<tbody>
+						<tbody id="taskTableBody">
 							<%
 							if (taskResultSet != null) {
 								while (taskResultSet.next()) {
+									String status = taskResultSet.getString("status") != null ? taskResultSet.getString("status") : "pending";
 							%>
-							<tr>
+							<tr data-status="<%=status%>">
 								<td><%=taskResultSet.getString("title")%></td>
 								<td><%=taskResultSet.getString("description")%></td>
 								<td><%=taskResultSet.getString("due_date")%></td>
-								<td><%=taskResultSet.getString("status") != null ? taskResultSet.getString("status") : "pending"%></td>
+								<td><select class="form-select status-select"
+									data-id="<%=taskResultSet.getString("id")%>">
+										<option value="pending"
+											<%="pending".equals(status) ? "selected" : ""%>>Pending</option>
+										<option value="completed"
+											<%="completed".equals(status) ? "selected" : ""%>>Completed</option>
+								</select></td>
 								<td><a class="btn btn-sm btn-warning"
 									href="TaskEdit.jsp?id=<%=taskResultSet.getString("id")%>">Edit</a>
 									<a class="btn btn-sm btn-danger"
@@ -213,6 +231,41 @@ body {
 			</div>
 		</div>
 	</div>
+	<script>
+document.querySelectorAll('.status-select').forEach(select => {
+	select.addEventListener('change', function () {
+		const taskId = this.dataset.id;
+		const newStatus = this.value;
+
+		fetch('UpdateTaskStatus', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+			body: `id=${taskId}&status=${newStatus}`
+		})
+		.then(response => {
+			if (!response.ok) throw new Error("Failed to update status");
+			return response.text();
+		})
+		.then(data => {
+			console.log("Status updated:", data);
+		})
+		.catch(err => alert("Error: " + err.message));
+	});
+});
+
+// Filter tasks
+document.getElementById('statusFilter').addEventListener('change', function () {
+	const selected = this.value.toLowerCase();
+	document.querySelectorAll('#taskTableBody tr').forEach(row => {
+		const rowStatus = row.getAttribute('data-status').toLowerCase();
+		if (selected === "all" || selected === rowStatus) {
+			row.style.display = "";
+		} else {
+			row.style.display = "none";
+		}
+	});
+});
+</script>
 
 	<script
 		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
